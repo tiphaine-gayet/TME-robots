@@ -21,32 +21,36 @@ def get_extended_sensors(sensors):
     
 def step(robotId, sensors):
     sensors = get_extended_sensors(sensors)
+
+	# aller tout droit par défaut
     translation = 1 # vitesse de translation (entre -1 et +1)
     rotation = 0 # vitesse de rotation (entre -1 et +1)
 
-   
-
+	#éviter les murs
+    if sensors["sensor_front_left"]["distance_to_wall"] < 1 or sensors["sensor_front"]["distance_to_wall"] < 1 or sensors["sensor_front_right"]["distance_to_wall"] < 1 :
+    	translation, rotation = hatewall(robotId, sensors)
+	
 
 	#éviter notre team, suivre l'autre
     if sensors["sensor_front"]["isRobot"] :
         translation, rotation = hatebot(robotId, sensors)
-        if sensors["sensor_front"]["isSameTeam"] == False and robotId%2==0:
+        if not sensors["sensor_front"]["isSameTeam"]: # and robotId%2==0:
         	translation, rotation = followbot(robotId, sensors)
     
     elif sensors["sensor_front_right"]["isRobot"] :
     	translation, rotation = hatebot(robotId, sensors)
-    	if sensors["sensor_front_right"]["isSameTeam"] == False and robotId%2==0:
+    	if not sensors["sensor_front_right"]["isSameTeam"]  : #and robotId%2==0:
         	translation, rotation = followbot(robotId, sensors)
     
     elif sensors["sensor_front_left"]["isRobot"] :
     	translation, rotation = hatebot(robotId, sensors)
-    	if sensors["sensor_front_left"]["isSameTeam"] == False and robotId%2==0:
+    	if not sensors["sensor_front_left"]["isSameTeam"] : # and robotId%2==0:
         	translation, rotation = followbot(robotId, sensors)
         	
-    if sensors["sensor_front_left"]["distance_to_wall"] < 0.5 and sensors["sensor_front"]["distance_to_wall"] <0.5 :
-        translation, rotation = 0.1, 0.75 # rotation vers la droite
-    elif sensors["sensor_front_right"]["distance_to_wall"] < 0.5:
-        translation, rotation = 0.1, -0.75  # rotation vers la gauche
+   # if sensors["sensor_front_left"]["distance_to_wall"] < 0.5 and sensors["sensor_front"]["distance_to_wall"] <0.5 :
+   #     translation, rotation = 0.1, 0.75 # rotation vers la droite
+   # elif sensors["sensor_front_right"]["distance_to_wall"] < 0.5:
+   #     translation, rotation = 0.1, -0.75  # rotation vers la gauche
    # if robotId%2==1 and sensors["sensor_front"]["distance_to_wall"]:
     #    translation, rotation = followwall(robotId, sensors)
     
@@ -79,6 +83,20 @@ def hatebot(robotId, sensors) :
     # limite les valeurs de sortie entre -1 et +1
     translation = max(-1,min(translation,1))
     rotation = max(-1, min(rotation, 1))
+
+    return translation, rotation
+    
+def hatewall(robotId, sensors):
+    translation = 1
+    if sensors["sensor_front"]["distance"] < 1:
+    	if random.random() < 0.75 : # va à gauche dans 75% des cas
+    		rotation = -0.5
+    	else :
+    		rotation = +0.5
+    if sensors["sensor_front_left"]["distance"] < 1 : # or sensors["sensor_front"]["distance"] < 1 :
+        rotation = 0.5
+    elif sensors["sensor_front_right"]["distance"] < 1:
+        rotation = -0.5
 
     return translation, rotation
     
