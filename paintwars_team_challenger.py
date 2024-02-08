@@ -6,6 +6,9 @@
 
 import random
 
+previous_distances = [0,0,0,0,0,0,0,0] #indice du sensor qui a capté une distance à 0
+ss = ["sensor_front","sensor_front_right","sensor_right","sensor_back_right","sensor_back","sensor_back_left","sensor_left","sensor_front_left"]
+
 def get_team_name():
     return "[ BALALAIKA ]" # à compléter (comme vous voulez)
 
@@ -20,16 +23,14 @@ def get_extended_sensors(sensors):
     return sensors
     
 def step(robotId, sensors):
+
+    global previous_distances, ss
     sensors = get_extended_sensors(sensors)
 
 	# aller tout droit par défaut
     translation = 1 # vitesse de translation (entre -1 et +1)
     rotation = 0 # vitesse de rotation (entre -1 et +1)
 
-	#éviter les murs
-    if sensors["sensor_front_left"]["distance_to_wall"] < 1 or sensors["sensor_front"]["distance_to_wall"] < 1 or sensors["sensor_front_right"]["distance_to_wall"] < 1 :
-    	translation, rotation = hatewall(robotId, sensors)
-	
 
 	#éviter notre team, suivre l'autre
     if sensors["sensor_front"]["isRobot"] :
@@ -46,18 +47,25 @@ def step(robotId, sensors):
     	translation, rotation = hatebot(robotId, sensors)
     	if not sensors["sensor_front_left"]["isSameTeam"] : # and robotId%2==0:
         	translation, rotation = followbot(robotId, sensors)
-        	
-   # if sensors["sensor_front_left"]["distance_to_wall"] < 0.5 and sensors["sensor_front"]["distance_to_wall"] <0.5 :
-   #     translation, rotation = 0.1, 0.75 # rotation vers la droite
-   # elif sensors["sensor_front_right"]["distance_to_wall"] < 0.5:
-   #     translation, rotation = 0.1, -0.75  # rotation vers la gauche
-   # if robotId%2==1 and sensors["sensor_front"]["distance_to_wall"]:
-    #    translation, rotation = followwall(robotId, sensors)
     
-   # if sensors["sensor_front"]["distance"] ==0 or sensors["sensor_front_right"]["distance"]==0 or sensors["sensor_front_left"]["distance"]==0 :
-   #	translation, rotation =1,  random.randint(1,3)
     
+    
+    # éviter les murs
+    if sensors["sensor_front_left"]["distance_to_wall"] < 1 or sensors["sensor_front"]["distance_to_wall"] < 1 or sensors["sensor_front_right"]["distance_to_wall"] < 1 :
+    	translation, rotation = hatewall(robotId, sensors)
+    	
+    # si tout de même, le robot est bloqué depuis 2 tours (la distance du même sensor est à 0 depuis le tour dernier
+    if previous_distances[int(robotId)]!= -1 and sensors[ss[previous_distances[int(robotId)]]]["distance"] <= 0.125:
+    	rotation = random.uniform(-1,1)
+    else :
+    	previous_distances[int(robotId)] = -1
+    	
 	
+    for i in range(8):
+    	if sensors[ss[i]]["distance"] <=0.125:
+    	    previous_distances[int(robotId)] = i
+		
+
     return translation, rotation
     
     
@@ -78,7 +86,7 @@ def hatebot(robotId, sensors) :
     rotation = (-1) * sensors["sensor_front_left"]["distance_to_robot"] + (1) * sensors["sensor_front_right"]["distance_to_robot"]
     
     if sensors["sensor_front"]["distance"] <=0.125 or sensors["sensor_front_right"]["distance"]<=0.125 or sensors["sensor_front_left"]["distance"]<=0.125:
-    	translation, rotation =1,  random.randint(1,3) 
+    	translation, rotation =1,  random.uniform(-1,1)
 
     # limite les valeurs de sortie entre -1 et +1
     translation = max(-1,min(translation,1))
