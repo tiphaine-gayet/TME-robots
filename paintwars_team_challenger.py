@@ -31,6 +31,8 @@ def step(robotId, sensors):
     translation = 1 # vitesse de translation (entre -1 et +1)
     rotation = 0 # vitesse de rotation (entre -1 et +1)
 
+    #if robotId == 2 :
+    #	rotation = random.uniform(-0.5, 0.5)
 
 	#éviter notre team, suivre l'autre
     if sensors["sensor_front"]["isRobot"] :
@@ -108,16 +110,16 @@ def hatewall(robotId, sensors):
 
     return translation, rotation
     
-def followwall(robotId, sensors):
-    
-    translation = 1 * sensors["sensor_front"]["distance"]
-    rotation = (0.5) * sensors["sensor_front_left"]["distance_to_wall"] + (-0.5) * sensors["sensor_front_right"]["distance_to_wall"]
+#def followwall(robotId, sensors):
+#    
+#    translation = 1 * sensors["sensor_front"]["distance"]
+#    rotation = (0.5) * sensors["sensor_front_left"]["distance_to_wall"] + (-0.5) * sensors["sensor_front_right"]["distance_to_wall"]
     #if sensors["sensor_front_left"]["distance_to_wall"] <=0.125:
     #   rotation = 1
     
     # limite les valeurs de sortie entre -1 et +1
-    translation = max(-1,min(translation,1))
-    rotation = max(-1, min(rotation, 1))
+#    translation = max(-1,min(translation,1))
+#    rotation = max(-1, min(rotation, 1))
 
 
-    return translation, rotation
+#    return translation, rotation
